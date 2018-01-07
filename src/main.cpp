@@ -65,11 +65,8 @@ Eigen::VectorXd polyfit(Eigen::VectorXd xvals, Eigen::VectorXd yvals,
   return result;
 }
 
-Eigen::VectorXd get_inputs(Eigen::VectorXd &state, vector<double> ptsx, vector<double> ptsy, double px, double py, double psi, double v)
+static Eigen::VectorXd get_state(Eigen::VectorXd &state, vector<double> ptsx, vector<double> ptsy, double px, double py, double psi, double v)
 {
-    // ptsx, ptsy, px, py, psi
-
-
     vector<double> waypoints_x;
     vector<double> waypoints_y;
 
@@ -134,7 +131,7 @@ int main() {
           *
           */
 		  Eigen::VectorXd state(6);
-		  auto coeffs = get_inputs(state, ptsx, ptsy, px, py, psi, v);
+		  auto coeffs = get_state(state, ptsx, ptsy, px, py, psi, v);
           auto vars = mpc.Solve(state, coeffs);
           steer_value = vars[0];
           throttle_value = vars[1];
