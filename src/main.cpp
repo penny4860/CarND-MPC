@@ -65,7 +65,15 @@ Eigen::VectorXd polyfit(Eigen::VectorXd xvals, Eigen::VectorXd yvals,
   return result;
 }
 
-static Eigen::VectorXd get_state(Eigen::VectorXd &state, vector<double> ptsx, vector<double> ptsy, double px, double py, double psi, double v)
+static Eigen::VectorXd get_state(Eigen::VectorXd &state,
+		vector<double> ptsx,
+		vector<double> ptsy,
+		double px,
+		double py,
+		double psi,
+		double v,
+		double delta,
+		double a)
 {
     vector<double> waypoints_x;
     vector<double> waypoints_y;
@@ -90,10 +98,23 @@ static Eigen::VectorXd get_state(Eigen::VectorXd &state, vector<double> ptsx, ve
     double epsi = -atan(coeffs[1]);  // p
 
 //    Eigen::VectorXd state(6);
-    state << 0, 0, 0, v, cte, epsi;
+//    state << 0, 0, 0, v, cte, epsi;
+    const double dt = 0.1;	//given
+    const double Lf = 2.67;
+    const double current_px = 0.0 + v * dt;  				//cos(0.0) == 1.0
+	const double current_py = 0.0;							//sin(0.0) == 0.0
+	const double current_psi = 0.0 + v / Lf * (-delta) * dt;
+	const double current_v = v + a * dt;
+	const double current_cte = cte + v * sin(epsi) * dt;
+	const double current_epsi = epsi + v / Lf * (-delta) * dt;
+	state << current_px, current_py, current_psi, current_v, current_cte, current_epsi;
     return coeffs;
 }
 
+Eigen::VectorXd delayed_state(Eigen::VectorXd state, double delta, double a, double cte, double epsi, double dt=0.1, double Lf=2.67)
+{
+	return state;
+}
 
 int main() {
   uWS::Hub h;
@@ -131,14 +152,12 @@ int main() {
           *
           */
           ////////////////////////////////////////////////////////////////////////////////
-		  Eigen::VectorXd state(6);
-		  auto coeffs = get_state(state, ptsx, ptsy, px, py, psi, v);
 		  const double delta = j[1]["steering_angle"];
 		  const double a = j[1]["throttle"];
-		  const double cte = coeffs[0];
-		  const double epsi = -atan(coeffs[1]);
-          const double dt = 0.1;
-          const double Lf = 2.67;
+
+		  Eigen::VectorXd state(6);
+		  auto coeffs = get_state(state, ptsx, ptsy, px, py, psi, v, delta, a);
+
           const double current_px = 0.0 + v * dt;  				//cos(0.0) == 1.0
           const double current_py = 0.0;						//sin(0.0) == 0.0
           const double current_psi = 0.0 + v / Lf * (-delta) * dt;
