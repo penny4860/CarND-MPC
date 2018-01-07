@@ -97,8 +97,7 @@ static Eigen::VectorXd get_state(Eigen::VectorXd &state,
     double cte = polyeval(coeffs, 0);  // px = 0, py = 0
     double epsi = -atan(coeffs[1]);  // p
 
-//    Eigen::VectorXd state(6);
-//    state << 0, 0, 0, v, cte, epsi;
+    // Get the state after time dt (0.1 sec)
     const double dt = 0.1;	//given
     const double Lf = 2.67;
     const double current_px = 0.0 + v * dt;  				//cos(0.0) == 1.0
@@ -151,22 +150,10 @@ int main() {
           * Both are in between [-1, 1].
           *
           */
-          ////////////////////////////////////////////////////////////////////////////////
 		  const double delta = j[1]["steering_angle"];
 		  const double a = j[1]["throttle"];
-
 		  Eigen::VectorXd state(6);
 		  auto coeffs = get_state(state, ptsx, ptsy, px, py, psi, v, delta, a);
-
-          const double current_px = 0.0 + v * dt;  				//cos(0.0) == 1.0
-          const double current_py = 0.0;						//sin(0.0) == 0.0
-          const double current_psi = 0.0 + v / Lf * (-delta) * dt;
-          const double current_v = v + a * dt;
-          const double current_cte = cte + v * sin(epsi) * dt;
-          const double current_epsi = epsi + v / Lf * (-delta) * dt;
-          state << current_px, current_py, current_psi, current_v, current_cte, current_epsi;
-          ////////////////////////////////////////////////////////////////////////////////
-
           auto vars = mpc.Solve(state, coeffs);
           steer_value = vars[0];
           throttle_value = vars[1];
