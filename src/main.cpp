@@ -145,6 +145,7 @@ int main() {
           const double current_v = v + a * dt;
           const double current_cte = cte + v * sin(epsi) * dt;
           const double current_epsi = epsi + v * (-delta) / Lf * dt;
+          state << current_px, current_py, current_psi, current_v, current_cte, current_epsi;
           ////////////////////////////////////////////////////////////////////////////////
 
           auto vars = mpc.Solve(state, coeffs);
