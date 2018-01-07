@@ -31,6 +31,7 @@ size_t epsi_start = cte_start + N;
 size_t delta_start = epsi_start + N;
 size_t a_start = delta_start + N - 1;
 
+
 class FG_eval {
  public:
   // Fitted polynomial coefficients
@@ -46,26 +47,31 @@ class FG_eval {
     // The cost is stored is the first element of `fg`.
     // Any additions to the cost should be added to `fg[0]`.
     fg[0] = 0;
+#define W_CTE 		300
+#define W_EPSI 		300
+#define W_V 		1
+#define W_DELTA 	2000
+#define W_A 		20
+#define W_DDELTA 	5000
+#define W_DA 		10
 
     // Reference State Cost
     // TODO: Define the cost related the reference state and
     // any anything you think may be beneficial.
     for (int i = 0; i < N; i++) {
-      fg[0] += 3000*CppAD::pow(vars[cte_start + i], 2);
-      fg[0] += 3000*CppAD::pow(vars[epsi_start + i], 2);
-      fg[0] += CppAD::pow(vars[v_start + i] - ref_v, 2);
+      fg[0] += W_CTE * CppAD::pow(vars[cte_start + i], 2);
+      fg[0] += W_EPSI * CppAD::pow(vars[epsi_start + i], 2);
+      fg[0] += W_V * CppAD::pow(vars[v_start + i] - ref_v, 2);
     }
 
     for (int i = 0; i < N - 1; i++) {
-      fg[0] += 5*CppAD::pow(vars[delta_start + i], 2);
-      fg[0] += 5*CppAD::pow(vars[a_start + i], 2);
-      // try adding penalty for speed + steer
-      fg[0] += 700*CppAD::pow(vars[delta_start + i] * vars[v_start+i], 2);
+      fg[0] += W_DELTA * CppAD::pow(vars[delta_start + i], 2);
+      fg[0] += W_A * CppAD::pow(vars[a_start + i], 2);
     }
 
     for (int i = 0; i < N - 2; i++) {
-      fg[0] += 200*CppAD::pow(vars[delta_start + i + 1] - vars[delta_start + i], 2);
-      fg[0] += 10*CppAD::pow(vars[a_start + i + 1] - vars[a_start + i], 2);
+      fg[0] += W_DDELTA * CppAD::pow(vars[delta_start + i + 1] - vars[delta_start + i], 2);
+      fg[0] += W_DA * CppAD::pow(vars[a_start + i + 1] - vars[a_start + i], 2);
     }
 
     //
