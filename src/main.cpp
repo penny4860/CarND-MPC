@@ -65,7 +65,7 @@ Eigen::VectorXd polyfit(Eigen::VectorXd xvals, Eigen::VectorXd yvals,
   return result;
 }
 
-auto get_inputs(Eigen::VectorXd &state, vector<double> ptsx, vector<double> ptsy, double px, double py, double psi)
+Eigen::VectorXd get_inputs(Eigen::VectorXd &state, vector<double> ptsx, vector<double> ptsy, double px, double py, double psi, double v)
 {
     // ptsx, ptsy, px, py, psi
 
@@ -133,7 +133,7 @@ int main() {
           */
           /////////////////////////////////////////////////////////////////////////////////
 		  Eigen::VectorXd state(6);
-          get_inputs(state, ptsx, ptsy, px, py, psi);
+		  auto coeffs = get_inputs(state, ptsx, ptsy, px, py, psi, v);
 
           ///////////////////////////////////////////////////////////////////////////////////
           double steer_value = j[1]["steering_angle"];
