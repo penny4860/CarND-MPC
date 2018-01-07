@@ -65,6 +65,39 @@ Eigen::VectorXd polyfit(Eigen::VectorXd xvals, Eigen::VectorXd yvals,
   return result;
 }
 
+auto get_inputs(Eigen::VectorXd &state, vector<double> ptsx, vector<double> ptsy, double px, double py, double psi)
+{
+    // ptsx, ptsy, px, py, psi
+
+
+    vector<double> waypoints_x;
+    vector<double> waypoints_y;
+
+    // transform waypoints to be from car's perspective
+    // this means we can consider px = 0, py = 0, and psi = 0
+    // greatly simplifying future calculations
+    for (int i = 0; i < ptsx.size(); i++) {
+      double dx = ptsx[i] - px;
+      double dy = ptsy[i] - py;
+      waypoints_x.push_back(dx * cos(-psi) - dy * sin(-psi));
+      waypoints_y.push_back(dx * sin(-psi) + dy * cos(-psi));
+    }
+
+    double* ptrx = &waypoints_x[0];
+    double* ptry = &waypoints_y[0];
+    Eigen::Map<Eigen::VectorXd> waypoints_x_eig(ptrx, 6);
+    Eigen::Map<Eigen::VectorXd> waypoints_y_eig(ptry, 6);
+
+    auto coeffs = polyfit(waypoints_x_eig, waypoints_y_eig, 3);
+    double cte = polyeval(coeffs, 0);  // px = 0, py = 0
+    double epsi = -atan(coeffs[1]);  // p
+
+//    Eigen::VectorXd state(6);
+    state << 0, 0, 0, v, cte, epsi;
+    return coeffs;
+}
+
+
 int main() {
   uWS::Hub h;
 
@@ -98,34 +131,14 @@ int main() {
           * Both are in between [-1, 1].
           *
           */
+          /////////////////////////////////////////////////////////////////////////////////
+		  Eigen::VectorXd state(6);
+          get_inputs(state, ptsx, ptsy, px, py, psi);
 
-          vector<double> waypoints_x;
-          vector<double> waypoints_y;
-
-          // transform waypoints to be from car's perspective
-          // this means we can consider px = 0, py = 0, and psi = 0
-          // greatly simplifying future calculations
-          for (int i = 0; i < ptsx.size(); i++) {
-            double dx = ptsx[i] - px;
-            double dy = ptsy[i] - py;
-            waypoints_x.push_back(dx * cos(-psi) - dy * sin(-psi));
-            waypoints_y.push_back(dx * sin(-psi) + dy * cos(-psi));
-          }
-
-          double* ptrx = &waypoints_x[0];
-          double* ptry = &waypoints_y[0];
-          Eigen::Map<Eigen::VectorXd> waypoints_x_eig(ptrx, 6);
-          Eigen::Map<Eigen::VectorXd> waypoints_y_eig(ptry, 6);
-
-          auto coeffs = polyfit(waypoints_x_eig, waypoints_y_eig, 3);
-          double cte = polyeval(coeffs, 0);  // px = 0, py = 0
-          double epsi = -atan(coeffs[1]);  // p
-
+          ///////////////////////////////////////////////////////////////////////////////////
           double steer_value = j[1]["steering_angle"];
           double throttle_value = j[1]["throttle"];
 
-          Eigen::VectorXd state(6);
-          state << 0, 0, 0, v, cte, epsi;
           auto vars = mpc.Solve(state, coeffs);
           steer_value = vars[0];
           throttle_value = vars[1];
