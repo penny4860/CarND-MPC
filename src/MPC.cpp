@@ -52,7 +52,7 @@ class FG_eval {
 #define W_V 		1
 #define W_DELTA 	2000
 #define W_A 		20
-#define W_DDELTA 	5000
+#define W_DDELTA 	100000
 #define W_DA 		10
 
     // Reference State Cost
