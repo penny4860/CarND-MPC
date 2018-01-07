@@ -3,6 +3,42 @@ Self-Driving Car Engineer Nanodegree Program
 
 ---
 
+
+## Report
+
+#### 1. The Model
+
+The Model Predictive Control (MPC) algorithm requires a model to predict vehicle motion.
+In this project, I used a kinematic model that simplified the real dynamic model.
+
+* State: basically contains x position, y position, orientation angle, velocity to express the state of the car. Here, cross track error and orientation error (epsi) are used to express the error with reference track
+Add. The kinematic model used in this project has a total of 6 variables as state.
+
+* Actuator: Use acceleration and steering angle as control input.
+
+* Update Equation for state
+![equ](./equ.png)
+
+#### 2. Timestep Length and Elapsed Duration (N & dt)
+
+Initially, Timestep and Total Duration (N * dt) were set large enough. The larger the value, the more stable the controller can be implemented. Starting at 25 / 0.05, Timestep was reduced to the limit of keeping the Total Duration at 1 sec. The smaller the Timestep, the smaller the computational cost. I finally selected a value of 10 / 0.1.
+
+#### 3. Polynomial Fitting and MPC Preprocessing
+
+The waypoint is pre-processed by converting the center of the vehicle. Since the position of the vehicle is the origin and the orientation is 0, much of the formula is simplified.
+
+#### 4. Model Predictive Control with Latency
+
+I used two methods to control the error due to latency.
+
+* First, I gave delay to the state value input to Solve() of MPC class. This project assumes a latency of 100 msec. 
+To compensate for this, at the predicting the state after 100msec of the current state (main.cpp 100 ~ 109 line),
+MPC was performed.
+
+* Secondly, I have tuned the weight for the rate of change of the delta highly in the cost fucntion. 
+The state after latency is not a precise value because it is a predicted value. therefore
+I have tuned the weight of the rate of change of the delta highly to achieve a stable controller.
+
 ## Dependencies
 
 * cmake >= 3.5
