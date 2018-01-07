@@ -16,7 +16,8 @@ Add. The kinematic model used in this project has a total of 6 variables as stat
 
 * Actuator: Use acceleration and steering angle as control input.
 
-* Update Equation for state
+* Update Equation for state is as follows:
+
 ![equ](./equ.png)
 
 #### 2. Timestep Length and Elapsed Duration (N & dt)
