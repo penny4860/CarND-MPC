@@ -139,14 +139,24 @@ int main() {
 		  const double epsi = -atan(coeffs[1]);
           const double dt = 0.1;
           const double Lf = 2.67;
-          const double current_px = 0.0 + v * dt;
-          const double current_py = 0.0;
-          const double current_psi = 0.0 + v * (-delta) / Lf * dt;
+          const double current_px = 0.0 + v * dt;  				//cos(0.0) == 1.0
+          const double current_py = 0.0;						//sin(0.0) == 0.0
+          const double current_psi = 0.0 + v / Lf * (-delta) * dt;
           const double current_v = v + a * dt;
           const double current_cte = cte + v * sin(epsi) * dt;
-          const double current_epsi = epsi + v * (-delta) / Lf * dt;
+          const double current_epsi = epsi + v / Lf * (-delta) * dt;
           state << current_px, current_py, current_psi, current_v, current_cte, current_epsi;
           ////////////////////////////////////////////////////////////////////////////////
+
+          // TODO: Setup the rest of the model constraints
+          fg[1 + x_start + t] = x1 - (x0 + v0 * CppAD::cos(psi0) * dt);
+          fg[1 + y_start + t] = y1 - (y0 + v0 * CppAD::sin(psi0) * dt);
+          fg[1 + psi_start + t] = psi1 - (psi0 - v0/Lf * delta * dt);
+          fg[1 + v_start + t] = v1 - (v0 + a * dt);
+          fg[1 + cte_start + t] = cte1 - ((f0 - y0) + (v0 * CppAD::sin(epsi0) * dt));
+          fg[1 + epsi_start + t] = epsi1 - ((psi0 - psides0) - v0/Lf * delta * dt);
+
+
 
           auto vars = mpc.Solve(state, coeffs);
           steer_value = vars[0];
