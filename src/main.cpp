@@ -130,8 +130,23 @@ int main() {
           * Both are in between [-1, 1].
           *
           */
+          ////////////////////////////////////////////////////////////////////////////////
 		  Eigen::VectorXd state(6);
 		  auto coeffs = get_state(state, ptsx, ptsy, px, py, psi, v);
+		  const double delta = j[1]["steering_angle"];
+		  const double a = j[1]["throttle"];
+		  const double cte = coeffs[0];
+		  const double epsi = -atan(coeffs[1]);
+          const double dt = 0.1;
+          const double Lf = 2.67;
+          const double current_px = 0.0 + v * dt;
+          const double current_py = 0.0;
+          const double current_psi = 0.0 + v * (-delta) / Lf * dt;
+          const double current_v = v + a * dt;
+          const double current_cte = cte + v * sin(epsi) * dt;
+          const double current_epsi = epsi + v * (-delta) / Lf * dt;
+          ////////////////////////////////////////////////////////////////////////////////
+
           auto vars = mpc.Solve(state, coeffs);
           steer_value = vars[0];
           throttle_value = vars[1];
